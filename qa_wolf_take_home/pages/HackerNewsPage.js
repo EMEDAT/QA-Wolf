@@ -1,15 +1,15 @@
 //HackerNewsPage.js
 
 class HackerNewsPage {
-    constructor(page) {
-      this.page = page;
-      this.url = 'https://news.ycombinator.com/newest';
-      this.articleSelector = '.athing';
-      this.ageSelector = '.age';
-      this.searchInputSelector = 'input[name="q"]';
-      this.moreLinkSelector = 'a.morelink';
-      this.mobileMenuSelector = '.pagetop > a[href="news"]';
-    }
+  constructor(page, config) {
+    this.page = page;
+    this.url = config.baseUrl;
+    this.articleSelector = '.athing';
+    this.ageSelector = '.age';
+    this.searchInputSelector = 'input[name="q"]';
+    this.moreLinkSelector = 'a.morelink';
+    this.mobileMenuSelector = '.pagetop > a[href="news"]';
+  }
   
     async navigate() {
       await this.page.goto(this.url);
@@ -36,11 +36,11 @@ class HackerNewsPage {
     }
   
     async setMobileViewport() {
-      await this.page.setViewportSize({ width: 375, height: 667 });
+      await this.page.setViewportSize(config.viewports.mobile);
     }
-  
+
     async resetViewport() {
-      await this.page.setViewportSize({ width: 1280, height: 720 });
+      await this.page.setViewportSize(config.viewports.desktop);
     }
   
     async isMobileMenuVisible() {

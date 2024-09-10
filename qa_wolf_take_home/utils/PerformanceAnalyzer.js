@@ -3,8 +3,9 @@
 const { chromium } = require('playwright');
 
 class PerformanceAnalyzer {
-  constructor(page) {
+  constructor(page, config) {
     this.page = page;
+    this.thresholds = config.performanceThresholds;
   }
 
   async captureMetrics() {
@@ -20,6 +21,15 @@ class PerformanceAnalyzer {
         domContentLoaded: this.getMetricValue(metrics, 'DomContentLoaded'),
         loadTime: this.getMetricValue(metrics, 'LoadTime'),
       };
+
+      // Compare with thresholds
+      const thresholdViolations = Object.entries(performanceMetrics).filter(
+        ([key, value]) => value > this.thresholds[key]
+      );
+
+      if (thresholdViolations.length > 0) {
+        console.warn('Performance threshold violations:', thresholdViolations);
+      }
 
       console.log('Performance metrics captured:', JSON.stringify(performanceMetrics, null, 2));
       return performanceMetrics;

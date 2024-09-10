@@ -3,21 +3,22 @@
 const axe = require('axe-core');
 
 class AccessibilityChecker {
-  constructor(page) {
+  constructor(page, config) {
     this.page = page;
+    this.accessibilityLevel = config.accessibilityLevel;
   }
 
   async analyze() {
     try {
       await this.page.evaluate(axe.source);
-      const results = await this.page.evaluate(() => {
+      const results = await this.page.evaluate((level) => {
         return new Promise(resolve => {
-          axe.run((err, results) => {
+          axe.run({ runOnly: { type: 'tag', values: [level] } }, (err, results) => {
             if (err) throw err;
             resolve(results);
           });
         });
-      });
+      }, this.accessibilityLevel);
 
       const violations = results.violations;
       if (violations.length > 0) {

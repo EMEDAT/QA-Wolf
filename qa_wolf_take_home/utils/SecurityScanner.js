@@ -1,10 +1,11 @@
 // SecurityScanner.js
 
 class SecurityScanner {
-    constructor(page) {
-      this.page = page;
-    }
-  
+  constructor(page, config) {
+    this.page = page;
+    this.requiredHeaders = config.securityHeaders;
+  }
+
     async scan() {
       try {
         const securityIssues = [];
@@ -14,6 +15,10 @@ class SecurityScanner {
         if (!isSecure) {
           securityIssues.push({ type: 'insecure_connection', message: 'The page is not served over HTTPS' });
         }
+
+        // Check for required security headers
+        const missingHeaders = await this.checkSecurityHeaders();
+        securityIssues.push(...missingHeaders);
   
         // Check for presence of Content Security Policy
         const hasCSP = await this.checkContentSecurityPolicy();
@@ -55,6 +60,22 @@ class SecurityScanner {
         );
       });
       return headers.hasOwnProperty('content-security-policy');
+    }
+
+    async checkSecurityHeaders() {
+      const headers = await this.page.evaluate(() => {
+        return Object.fromEntries(
+          Object.entries(window.performance.getEntriesByType('navigation')[0].serverTiming)
+            .map(([key, value]) => [key.toLowerCase(), value])
+        );
+      });
+  
+      return this.requiredHeaders
+        .filter(header => !headers.hasOwnProperty(header.toLowerCase()))
+        .map(header => ({
+          type: 'missing_security_header',
+          message: `Missing security header: ${header}`
+        }));
     }
   
     async checkVulnerableLibraries() {
