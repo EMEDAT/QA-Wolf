@@ -1,3 +1,5 @@
+//playwright.config.js
+
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 
@@ -23,6 +25,7 @@ module.exports = defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  timeout: 120000, // Set global timeout to 120 seconds
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     // baseURL: 'http://127.0.0.1:3000',

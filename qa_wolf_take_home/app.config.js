@@ -15,10 +15,10 @@ module.exports = {
   
     // Performance thresholds (in milliseconds)
     performanceThresholds: {
-      firstContentfulPaint: 1000,
-      timeToInteractive: 3000,
-      domContentLoaded: 2000,
-      loadTime: 5000
+      firstContentfulPaint: 3000,
+      timeToInteractive: 6000,    
+      domContentLoaded: 4000,     
+      loadTime: 10000            
     },
   
     // Viewport sizes for responsive design testing

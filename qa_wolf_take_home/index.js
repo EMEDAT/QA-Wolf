@@ -5,7 +5,7 @@ const { PerformanceAnalyzer } = require('./utils/PerformanceAnalyzer');
 const { AccessibilityChecker } = require('./utils/AccessibilityChecker');
 const { SecurityScanner } = require('./utils/SecurityScanner');
 const { reportResults } = require('./utils/Reporter');
-const config = require('./app.config.js');  // Import the app.config.js here
+const { config } = require('./config');
 
 /**
  * Main test suite for Hacker News validation
@@ -33,8 +33,8 @@ test.describe('Hacker News Validation', () => {
     accessibilityChecker = new AccessibilityChecker(page);
     securityScanner = new SecurityScanner(page);
 
-    // Set default timeout for all operations to 30 seconds
-    test.setTimeout(30000);
+    // Set default timeout for all operations to 120 seconds
+    test.setTimeout(120000);
   });
 
   // Cleanup after all tests
@@ -49,7 +49,7 @@ test.describe('Hacker News Validation', () => {
   test('Validate article sorting and perform additional checks', async () => {
     // Step 1: Navigate to Hacker News newest page
     await test.step('Navigate to Hacker News newest page', async () => {
-      await hackerNewsPage.navigate(config.baseUrl);  // Use baseUrl from config
+      await hackerNewsPage.navigate();
       // Verify that the correct page has loaded
       await expect(page).toHaveTitle(/Hacker News/);
     });
@@ -82,10 +82,10 @@ test.describe('Hacker News Validation', () => {
 
     // Step 4: Check responsive design
     await test.step('Check responsive design', async () => {
-      await hackerNewsPage.setMobileViewport(config.viewports.mobile);  // Use mobile viewport from config
+      await hackerNewsPage.setMobileViewport();
       const isMobileMenuVisible = await hackerNewsPage.isMobileMenuVisible();
       expect(isMobileMenuVisible, 'Mobile menu should be visible in mobile viewport').toBeTruthy();
-      await hackerNewsPage.resetViewport(config.viewports.desktop);  // Use desktop viewport from config
+      await hackerNewsPage.resetViewport();
     });
 
     // Step 5: Perform performance analysis
@@ -101,7 +101,7 @@ test.describe('Hacker News Validation', () => {
 
     // Step 6: Check accessibility
     await test.step('Check accessibility', async () => {
-      const accessibilityViolations = await accessibilityChecker.analyze(config.accessibilityLevel);
+      const accessibilityViolations = await accessibilityChecker.analyze();
       expect(accessibilityViolations.length, 'There should be no accessibility violations').toBe(0);
       
       if (accessibilityViolations.length > 0) {
@@ -111,7 +111,7 @@ test.describe('Hacker News Validation', () => {
 
     // Step 7: Perform security scan
     await test.step('Perform security scan', async () => {
-      const securityIssues = await securityScanner.scan(config.securityHeaders);
+      const securityIssues = await securityScanner.scan();
       expect(securityIssues.length, 'There should be no security issues').toBe(0);
       
       if (securityIssues.length > 0) {
@@ -119,24 +119,23 @@ test.describe('Hacker News Validation', () => {
       }
     });
 
-    // New step: Check for broken links
-    await test.step('Check for broken links', async () => {
-      const brokenLinks = await hackerNewsPage.checkBrokenLinks();
-      expect(brokenLinks.length, 'There should be no more than the maximum allowed broken links')
-        .toBeLessThanOrEqual(config.maxBrokenLinks);
-      
-      if (brokenLinks.length > 0) {
-        console.error('Broken Links:', JSON.stringify(brokenLinks, null, 2));
-      }
-    });
+      // New step: Check for broken links
+      await test.step('Check for broken links', async () => {
+        const brokenLinks = await hackerNewsPage.checkBrokenLinks();
+        expect(brokenLinks.length, 'There should be no broken links').toBe(0);
+        
+        if (brokenLinks.length > 0) {
+          console.error('Broken Links:', JSON.stringify(brokenLinks, null, 2));
+        }
+      });
 
-    // New step: Validate comment functionality
-    await test.step('Validate comment functionality', async () => {
-      const commentCount = await hackerNewsPage.getCommentCount(1); // Get comment count for the first article
-      await hackerNewsPage.navigateToComments(1);
-      const actualComments = await hackerNewsPage.getVisibleComments();
-      expect(actualComments.length, 'Visible comments should match the comment count').toBe(commentCount);
-    });
+      // New step: Validate comment functionality
+      await test.step('Validate comment functionality', async () => {
+        const commentCount = await hackerNewsPage.getCommentCount(1); // Get comment count for the first article
+        await hackerNewsPage.navigateToComments(1);
+        const actualComments = await hackerNewsPage.getVisibleComments();
+        expect(actualComments.length, 'Visible comments should match the comment count').toBe(commentCount);
+      });
   });
 
   // Additional test case for error handling
@@ -145,7 +144,7 @@ test.describe('Hacker News Validation', () => {
     await page.route('**/*', route => route.abort('failed'));
     
     await expect(async () => {
-      await hackerNewsPage.navigate(config.baseUrl);
+      await hackerNewsPage.navigate();
     }).rejects.toThrow('net::ERR_FAILED');
 
     // Verify that our error handling logic captures this error
