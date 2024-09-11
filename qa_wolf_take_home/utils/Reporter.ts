@@ -20,8 +20,15 @@ interface Report {
   details: TestResult[];
 }
 
+export interface PlaywrightTestResult {
+  title: string;
+  status: 'passed' | 'failed';
+  duration: number;
+  error: Error | null;
+}
+
 export class Reporter {
-  private report: Report;
+  private readonly report: Report;
 
   constructor() {
     this.report = {
@@ -34,12 +41,22 @@ export class Reporter {
     this.report.details.push(this.createTestResult(testName, status, duration, error));
   }
 
+  async generateReport(outputPath: string): Promise<void> {
+    try {
+      this.summarizeResults();
+      await this.writeReportToFile(outputPath);
+      this.logReportSummary(outputPath);
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   private createTestResult(testName: string, status: 'passed' | 'failed', duration: number, error: Error | null): TestResult {
     return {
       name: testName,
       status,
       duration,
-      error: error ? error.message : null
+      error: error?.message ?? null
     };
   }
 
@@ -47,7 +64,6 @@ export class Reporter {
     const total = this.report.details.length;
     const passed = this.report.details.filter(test => test.status === 'passed').length;
     const failed = total - passed;
-
     this.report.summary = this.createReportSummary(total, passed, failed);
   }
 
@@ -61,40 +77,24 @@ export class Reporter {
   }
 
   private calculatePassRate(passed: number, total: number): string {
-    return (passed / total * 100).toFixed(2) + '%';
-  }
-
-  async generateReport(outputPath: string): Promise<void> {
-    try {
-      this.summarizeResults();
-      await this.writeReportToFile(outputPath);
-      this.logReportSummary(outputPath);
-    } catch (error) {
-      this.handleError(error);
-    }
+    return `${((passed / total) * 100).toFixed(2)}%`;
   }
 
   private async writeReportToFile(outputPath: string): Promise<void> {
     const reportContent = JSON.stringify(this.report, null, 2);
-    await fs.writeFile(outputPath, reportContent);
+    await fs.writeFile(outputPath, reportContent, 'utf8');
   }
 
   private logReportSummary(outputPath: string): void {
+    const { total, passed, failed, passRate } = this.report.summary as ReportSummary;
     console.log(`Test report generated: ${outputPath}`);
-    console.log(`Summary: Total: ${this.report.summary.total}, Passed: ${this.report.summary.passed}, Failed: ${this.report.summary.failed}, Pass Rate: ${this.report.summary.passRate}`);
+    console.log(`Summary: Total: ${total}, Passed: ${passed}, Failed: ${failed}, Pass Rate: ${passRate}`);
   }
 
-  private handleError(error: unknown): void {
+  private handleError(error: unknown): never {
     console.error('Error generating report:', error);
     throw new Error('Failed to generate test report');
   }
-}
-
-export interface PlaywrightTestResult {
-  title: string;
-  status: 'passed' | 'failed';
-  duration: number;
-  error: Error | null;
 }
 
 export async function reportResults(result: TestInfo | PlaywrightTestResult): Promise<void> {
@@ -103,12 +103,10 @@ export async function reportResults(result: TestInfo | PlaywrightTestResult): Pr
 }
 
 function determineStatus(result: TestInfo | PlaywrightTestResult): 'passed' | 'failed' {
-  if ('status' in result) {
+  if ('status' in result && typeof result.status === 'string') {
     return result.status === 'passed' ? 'passed' : 'failed';
-  } else {
-    // Handle TestInfo
-    return result.status && ['passed', 'failed'].includes(result.status) ? result.status as 'passed' | 'failed' : 'failed';
   }
+  return 'failed';
 }
 
 function logStatus(status: 'passed' | 'failed'): void {

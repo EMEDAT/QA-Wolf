@@ -8,7 +8,7 @@ export interface PerformanceMetrics {
 }
 
 interface Config {
-  performanceThresholds: { [key: string]: number };
+  performanceThresholds: Record<keyof PerformanceMetrics, number>;
 }
 
 interface PerformanceMetric {
@@ -17,8 +17,8 @@ interface PerformanceMetric {
 }
 
 export class PerformanceAnalyzer {
-  private page: Page;
-  private thresholds: { [key: string]: number };
+  private readonly page: Page;
+  private readonly thresholds: Config['performanceThresholds'];
 
   constructor(page: Page, config: Config) {
     this.page = page;
@@ -27,15 +27,14 @@ export class PerformanceAnalyzer {
 
   async captureMetrics(): Promise<PerformanceMetrics> {
     try {
-      const client: CDPSession = await this.page.context().newCDPSession(this.page);
+      const client = await this.page.context().newCDPSession(this.page);
       await client.send('Performance.enable');
       const result = await client.send('Performance.getMetrics');
-      const metrics: PerformanceMetric[] = result.metrics;
+      const metrics = result.metrics as PerformanceMetric[];
 
       return this.extractPerformanceMetrics(metrics);
     } catch (error) {
-      console.error('Error capturing performance metrics:', error);
-      throw new Error('Failed to capture performance metrics');
+      this.handleError('capturing performance metrics', error);
     }
   }
 
@@ -52,4 +51,39 @@ export class PerformanceAnalyzer {
     const metric = metrics.find(m => m.name === name);
     return metric ? metric.value : null;
   }
+
+  async analyzePerformance(): Promise<PerformanceAnalysisResult> {
+    const metrics = await this.captureMetrics();
+    return this.compareWithThresholds(metrics);
+  }
+
+  private compareWithThresholds(metrics: PerformanceMetrics): PerformanceAnalysisResult {
+    const results: Partial<Record<keyof PerformanceMetrics, boolean>> = {};
+    let allPassed = true;
+
+    for (const [key, value] of Object.entries(metrics) as [keyof PerformanceMetrics, number | null][]) {
+      if (value !== null) {
+        const passed = value <= this.thresholds[key];
+        results[key] = passed;
+        allPassed = allPassed && passed;
+      }
+    }
+
+    return {
+      metrics,
+      results: results as Record<keyof PerformanceMetrics, boolean>,
+      allPassed
+    };
+  }
+
+  private handleError(operation: string, error: unknown): never {
+    console.error(`Error ${operation}:`, error);
+    throw new Error(`Failed to ${operation}`);
+  }
+}
+
+interface PerformanceAnalysisResult {
+  metrics: PerformanceMetrics;
+  results: Record<keyof PerformanceMetrics, boolean>;
+  allPassed: boolean;
 }
