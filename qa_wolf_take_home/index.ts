@@ -9,14 +9,6 @@ import { SecurityScanner } from './utils/SecurityScanner';
 import { reportResults, PlaywrightTestResult } from './utils/Reporter';
 import config from './app.config';
 
-test.describe('Hacker News Validation', () => {
-  let page: Page;
-  let hackerNewsPage: HackerNewsPage;
-  let articleValidator: ArticleValidator;
-  let performanceAnalyzer: PerformanceAnalyzer;
-  let accessibilityChecker: AccessibilityChecker;
-  let securityScanner: SecurityScanner;
-
 
 /**
  * Validate first 100 articles on Hacker News/newest are sorted from newest to oldest
@@ -30,6 +22,13 @@ test.describe('Hacker News Validation', () => {
  */
 
 
+test.describe('Hacker News Validation', () => {
+  let page: Page;
+  let hackerNewsPage: HackerNewsPage;
+  let articleValidator: ArticleValidator;
+  let performanceAnalyzer: PerformanceAnalyzer;
+  let accessibilityChecker: AccessibilityChecker;
+  let securityScanner: SecurityScanner;
 
   // Setup before all tests
   test.beforeAll(async ({ browser }: { browser: Browser }) => {
