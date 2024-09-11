@@ -1,37 +1,26 @@
 import { Page, ElementHandle } from '@playwright/test';
 import config from '../app.config';
 
-interface ViewportSize {
-  width: number;
-  height: number;
-}
-
 interface ArticleData {
   title: string;
   timestamp: number;
 }
 
 export class HackerNewsPage {
-  private page: Page;
-  private url: string;
-  private articleSelector: string;
-  private ageSelector: string;
-  private searchInputSelector: string;
-  private mobileMenuSelector: string;
-  private config: typeof config;
-  private moreSelector: string;
+  private readonly page: Page;
+  private readonly url: string = 'https://news.ycombinator.com/newest';
+  private readonly selectors = {
+    article: '.athing',
+    age: '.age',
+    searchInput: 'input[name="q"]',
+    moreLink: 'a.morelink',
+    mobileMenu: '.pagetop > a[href="news"]',
+    comment: '.comment'
+  };
 
   constructor(page: Page) {
     this.page = page;
-    this.config = config;
-    this.url = 'https://news.ycombinator.com/newest';
-    this.articleSelector = '.athing';
-    this.ageSelector = '.age';
-    this.searchInputSelector = 'input[name="q"]';
-    this.moreSelector = 'a.morelink';
-    this.mobileMenuSelector = '.pagetop > a[href="news"]';
   }
-
 
   async navigate(): Promise<void> {
     await this.page.goto(this.url);
@@ -49,9 +38,9 @@ export class HackerNewsPage {
 
     for (const url of urls) {
       await this.page.goto(url);
-      await this.page.waitForSelector(this.articleSelector);
+      await this.page.waitForSelector(this.selectors.article);
 
-      const pageArticles = await this.page.$$eval('.athing', (articles, ageSelector) => {
+      const pageArticles = await this.page.$$eval(this.selectors.article, (articles, ageSelector) => {
         return articles.map(article => {
           const titleElement = article.querySelector('.titleline > a');
           const ageElement = article.nextElementSibling?.querySelector(ageSelector) as HTMLElement;
@@ -60,7 +49,7 @@ export class HackerNewsPage {
             timestamp: ageElement ? new Date(ageElement.title).getTime() : 0
           };
         });
-      }, '.age');
+      }, this.selectors.age);
 
       allArticles = allArticles.concat(pageArticles);
     }
@@ -68,36 +57,31 @@ export class HackerNewsPage {
     return allArticles.slice(0, 100);
   }
 
-  async getArticles(): Promise<ElementHandle<Element>[]> {
-    const articles = await this.page.$$(this.articleSelector);
-    return articles;
-  }
-
   async performSearch(query: string): Promise<void> {
-    await this.page.fill(this.searchInputSelector, query);
-    await this.page.press(this.searchInputSelector, 'Enter');
+    await this.page.fill(this.selectors.searchInput, query);
+    await this.page.press(this.selectors.searchInput, 'Enter');
     await this.page.waitForLoadState('networkidle');
   }
 
   async getSearchResults(): Promise<ElementHandle<Element>[]> {
-    return this.page.$$(this.articleSelector);
+    return this.page.$$(this.selectors.article);
   }
 
   async clickMoreLink(): Promise<void> {
-    await this.page.click(this.moreSelector);
+    await this.page.click(this.selectors.moreLink);
     await this.page.waitForLoadState('networkidle');
   }
 
   async setMobileViewport(): Promise<void> {
-    await this.page.setViewportSize(this.config.viewports.mobile);
+    await this.page.setViewportSize(config.viewports.mobile);
   }
 
   async resetViewport(): Promise<void> {
-    await this.page.setViewportSize(this.config.viewports.desktop);
+    await this.page.setViewportSize(config.viewports.desktop);
   }
 
   async isMobileMenuVisible(): Promise<boolean> {
-    return this.page.isVisible(this.mobileMenuSelector);
+    return this.page.isVisible(this.selectors.mobileMenu);
   }
 
   async checkBrokenLinks(): Promise<string[]> {
@@ -135,35 +119,22 @@ export class HackerNewsPage {
   }
 
   async getVisibleComments(): Promise<ElementHandle<Element>[]> {
-    return this.page.$$('.comment');
+    return this.page.$$(this.selectors.comment);
   }
 
   async getErrorLog(): Promise<string> {
-    // This is a placeholder to implement proper error logging.
     return await this.page.evaluate(() => {
-      return window.console.error.toString();
+      return (console.error as any).outputs ? (console.error as any).outputs.join('\n') : '';
     });
   }
 
-  validateSorting(articles: ArticleData[]): boolean {
-    let prevTimestamp = Infinity;
-    
-    for (const article of articles) {
-      if (article.timestamp > prevTimestamp) {
-        return false;
-      }
-      prevTimestamp = article.timestamp;
-    }
-
-    return true;
+  async getArticles(): Promise<ElementHandle<Element>[]> {
+    return this.page.$$(this.selectors.article);
   }
 
-  async getArticleTimestamp(article: ElementHandle<Element>): Promise<number> {
-    const ageElement = await article.$('.subtext .age');
-    if (!ageElement) {
-      throw new Error('Age element not found');
-    }
-    const ageText = await ageElement.getAttribute('title');
-    return ageText ? new Date(ageText).getTime() : 0;
+  validateSorting(articles: ArticleData[]): boolean {
+    return articles.every((article, index) => 
+      index === 0 || article.timestamp <= articles[index - 1].timestamp
+    );
   }
 }
