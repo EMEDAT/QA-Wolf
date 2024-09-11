@@ -39,7 +39,7 @@ export class ArticleValidator {
     return { isValid: true, message: 'All articles are correctly sorted' };
   }
   
-    async getArticleTimestamp(article) {
+    async getArticleTimestamp(article: any) {
       try {
         const ageElement = await article.$('.age');
         if (!ageElement) {
@@ -48,17 +48,17 @@ export class ArticleValidator {
         const ageText = await ageElement.getAttribute('title');
         return new Date(ageText).getTime();
       } catch (error) {
-        console.error(`Error getting timestamp for article: ${error.message}`);
+        console.error(`Error getting timestamp for article: ${(error as Error).message}`);
         return null;
       }
     }
   
-    async validateArticleContent(article) {
-      const title = await article.$eval('.titlelink', el => el.textContent);
-      const url = await article.$eval('.titlelink', el => el.href);
-      const author = await article.$eval('.hnuser', el => el.textContent);
-      const score = await article.$eval('.score', el => parseInt(el.textContent));
-  
+    async validateArticleContent(article: any) {
+      const title = await article.$eval('.titlelink', (el: HTMLElement) => el.textContent);
+      const url = await article.$eval('.titlelink', (el: HTMLAnchorElement) => el.href);
+      const author = await article.$eval('.hnuser', (el: HTMLElement) => el.textContent);
+      const score = await article.$eval('.score', (el: HTMLElement) => parseInt(el.textContent ?? ''));
+    
       return {
         isValid: title && url && author && !isNaN(score),
         details: { title, url, author, score }
