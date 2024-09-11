@@ -1,31 +1,43 @@
-class ArticleValidator {
-    constructor() {
-      this.timeThreshold = 5 * 60 * 1000; // 5 minutes in milliseconds
+export interface FullValidationResult {
+  sorting: { isValid: boolean; errorIndex?: number; message: string };
+  content: { isValid: boolean; details: any }[];
+  timestampAccuracy: { isAccurate: boolean; inaccurateArticles: { index: number; timestamp: number }[] };
+  uniqueness: { isUnique: boolean; duplicates: { index: number; title: string }[] };
+  isFullyValid: boolean;
+}
+
+export class ArticleValidator {
+  private timeThreshold: number;
+
+  constructor() {
+    this.timeThreshold = 5 * 60 * 1000; // 5 minutes in milliseconds
+  }
+
+  async validateSorting(articles: any[]): Promise<{ isValid: boolean; errorIndex?: number; message: string }> {
+    if (!Array.isArray(articles) || articles.length === 0) {
+      throw new Error('Invalid input: articles must be a non-empty array');
     }
-  
-    async validateSorting(articles) {
-      if (!Array.isArray(articles) || articles.length === 0) {
-        throw new Error('Invalid input: articles must be a non-empty array');
+
+    if (articles.length !== 100) {
+      return { isValid: false, message: `Expected 100 articles, but found ${articles.length}` };
+    }
+
+    let prevTimestamp = Infinity;
+    for (let i = 0; i < articles.length; i++) {
+      const timestamp = await this.getArticleTimestamp(articles[i]);
+      if (timestamp !== null && timestamp > prevTimestamp) {
+        return { 
+          isValid: false, 
+          errorIndex: i,
+          message: `Sorting error at index ${i}: ${new Date(timestamp).toISOString()} is newer than ${new Date(prevTimestamp).toISOString()}`
+        };
       }
-  
-      if (articles.length !== 100) {
-        return { isValid: false, errorIndex: -1, message: `Expected 100 articles, but found ${articles.length}` };
-      }
-  
-      let prevTimestamp = Infinity;
-      for (let i = 0; i < articles.length; i++) {
-        const timestamp = await this.getArticleTimestamp(articles[i]);
-        if (timestamp > prevTimestamp) {
-          return { 
-            isValid: false, 
-            errorIndex: i,
-            message: `Sorting error at index ${i}: ${new Date(timestamp).toISOString()} is newer than ${new Date(prevTimestamp).toISOString()}`
-          };
-        }
+      if (timestamp !== null) {
         prevTimestamp = timestamp;
       }
-      return { isValid: true, message: 'All articles are correctly sorted' };
     }
+    return { isValid: true, message: 'All articles are correctly sorted' };
+  }
   
     async getArticleTimestamp(article) {
       try {
@@ -53,13 +65,13 @@ class ArticleValidator {
       };
     }
   
-    async validateTimestampAccuracy(articles) {
+    async validateTimestampAccuracy(articles: any[]): Promise<{ isAccurate: boolean; inaccurateArticles: { index: number; timestamp: number }[] }> {
       const now = Date.now();
-      const inaccurateArticles = [];
+      const inaccurateArticles: { index: number; timestamp: number }[] = [];
   
       for (let i = 0; i < articles.length; i++) {
         const timestamp = await this.getArticleTimestamp(articles[i]);
-        if (now - timestamp > this.timeThreshold) {
+        if (timestamp !== null && now - timestamp > this.timeThreshold) {
           inaccurateArticles.push({ index: i, timestamp });
         }
       }
@@ -70,12 +82,12 @@ class ArticleValidator {
       };
     }
   
-    async validateUniqueness(articles) {
-      const titles = new Set();
-      const duplicates = [];
+    async validateUniqueness(articles: any[]): Promise<{ isUnique: boolean; duplicates: { index: number; title: string }[] }> {
+      const titles = new Set<string>();
+      const duplicates: { index: number; title: string }[] = [];
   
       for (let i = 0; i < articles.length; i++) {
-        const title = await articles[i].$eval('.titlelink', el => el.textContent);
+        const title = await articles[i].$eval('.titlelink', (el: HTMLElement) => el.textContent || '');
         if (titles.has(title)) {
           duplicates.push({ index: i, title });
         } else {
@@ -89,7 +101,7 @@ class ArticleValidator {
       };
     }
   
-    async performFullValidation(articles) {
+    async performFullValidation(articles: any[]): Promise<FullValidationResult> {
       const sortingResult = await this.validateSorting(articles);
       const contentResults = await Promise.all(articles.map(this.validateArticleContent));
       const timestampAccuracy = await this.validateTimestampAccuracy(articles);

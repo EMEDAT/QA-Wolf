@@ -1,19 +1,48 @@
-// AccessibilityChecker.js
+import { Page } from '@playwright/test';
+import axe from 'axe-core';
 
-const axe = require('axe-core');
+interface Config {
+  accessibilityLevel: string;
+}
 
-class AccessibilityChecker {
-  constructor(page, config) {
+interface AxeResults {
+  violations: AxeViolation[];
+}
+
+interface AxeViolation {
+  id: string;
+  impact: string;
+  description: string;
+  nodes: AxeNode[];
+}
+
+interface AxeNode {
+  html: string;
+  target: string[];
+}
+
+interface ContrastIssue {
+  element: string;
+  backgroundColor: string;
+  color: string;
+  contrast: number;
+}
+
+export class AccessibilityChecker {
+  private page: Page;
+  private accessibilityLevel: string;
+
+  constructor(page: Page, config: Config) {
     this.page = page;
     this.accessibilityLevel = config.accessibilityLevel;
   }
 
-  async analyze() {
+  async analyze(): Promise<AxeViolation[]> {
     try {
       await this.page.evaluate(axe.source);
-      const results = await this.page.evaluate((level) => {
-        return new Promise(resolve => {
-          axe.run({ runOnly: { type: 'tag', values: [level] } }, (err, results) => {
+      const results: AxeResults = await this.page.evaluate((level: string) => {
+        return new Promise((resolve) => {
+          axe.run({ runOnly: { type: 'tag', values: [level] } }, (err: Error | null, results: AxeResults) => {
             if (err) throw err;
             resolve(results);
           });
@@ -34,11 +63,11 @@ class AccessibilityChecker {
     }
   }
 
-  async checkColorContrast() {
+  async checkColorContrast(): Promise<ContrastIssue[]> {
     try {
-      const contrastIssues = await this.page.evaluate(() => {
+      const contrastIssues: ContrastIssue[] = await this.page.evaluate(() => {
         const elements = document.body.getElementsByTagName('*');
-        const issues = [];
+        const issues: ContrastIssue[] = [];
 
         for (let element of elements) {
           const style = window.getComputedStyle(element);
@@ -73,11 +102,9 @@ class AccessibilityChecker {
   }
 
   // Helper function to calculate contrast ratio
-  getContrastRatio(background, foreground) {
+  private getContrastRatio(background: string, foreground: string): number {
     // Implementation of contrast ratio calculation
     // This is a simplified version and should be replaced with a more accurate implementation
     return 5; // Placeholder return value
   }
 }
-
-module.exports = { AccessibilityChecker };
