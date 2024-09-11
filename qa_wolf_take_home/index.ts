@@ -97,13 +97,8 @@ test.describe('Hacker News Validation', () => {
   async function validateArticleSorting() {
     await test.step('Validate sorting and perform full validation of first 100 articles', async () => {
       const articleElements = await hackerNewsPage.getArticles();
-      const articles = await Promise.all(articleElements.map(async (element) => {
-        const title = await element.$eval('.titleline > a', el => el.textContent || '');
-        const timestamp = await element.$eval('.age', el => new Date(el.getAttribute('title') || '').getTime());
-        return { title, timestamp };
-      }));
-
-      const fullValidationResult: FullValidationResult = await articleValidator.performFullValidation(articles);
+      
+      const fullValidationResult: FullValidationResult = await articleValidator.performFullValidation(articleElements);
       
       expect(fullValidationResult.sorting.isValid, 'Articles should be correctly sorted').toBeTruthy();
       expect(fullValidationResult.isFullyValid, 'Articles should pass all validation checks').toBeTruthy();
