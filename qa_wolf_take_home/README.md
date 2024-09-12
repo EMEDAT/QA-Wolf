@@ -3,11 +3,25 @@
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
+  - [Main Assignment](#main-assignment)
+  - [Above and Beyond Tests](#above-and-beyond-tests)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
+  - [Key Points about the Main Test File](#key-points-about-the-main-test-file)
+  - [Page Object Model](#page-object-model)
+  - [Utility Classes](#utility-classes)
+  - [Configuration](#configuration)
+  - [Error Handling](#error-handling)
+  - [Performance Testing](#performance-testing)
+  - [Accessibility Testing](#accessibility-testing)
+  - [Security Scanning](#security-scanning)
+  - [Responsive Design Testing](#responsive-design-testing)
+  - [Detailed Logging and Reporting](#detailed-logging-and-reporting)
+  - [Best Practices Implemented](#best-practices-implemented)
+  - [Going Above and Beyond](#going-above-and-beyond)
 - [Performance Analysis](#performance-analysis)
 - [Accessibility Checking](#accessibility-checking)
 - [Security Scanning](#security-scanning)
@@ -22,15 +36,16 @@ This project is an automated testing suite for validating the Hacker News websit
 
 ## Features
 
-- Validates the sorting of the first 100 articles on Hacker News
-- Performs comprehensive article validation
-- Conducts performance analysis
-- Checks for accessibility issues
-- Scans for security vulnerabilities
-- Verifies responsive design
-- Checks for broken links
-- Validates comment functionality
-- Handles and reports errors gracefully
+### Main Assignment
+- **Validate first 100 articles on Hacker News/newest are sorted from newest to oldest**: Ensures that the articles are correctly sorted.
+
+### Above and Beyond Tests
+- **Performance Analysis**: Captures and analyzes key performance metrics.
+- **Accessibility Checking**: Performs comprehensive accessibility audits.
+- **Security Scanning**: Conducts basic security scans.
+- **Error Handling**: Demonstrates attention to edge cases with specific tests for error handling.
+- **Responsive Design Testing**: Ensures a good user experience across devices.
+- **Detailed Logging and Reporting**: Logs detailed information about test runs and generates a report.
 
 ## Prerequisites
 
@@ -40,17 +55,17 @@ This project is an automated testing suite for validating the Hacker News websit
 ## Installation
 
 1. Clone the repository:
-   ```
+   ```sh
    git clone https://github.com/EMEDAT/QA-Wolf.git
    ```
 
 2. Navigate to the project directory:
-   ```
+   ```sh
    cd qa_wolf_take_home
    ```
 
 3. Install dependencies:
-   ```
+   ```sh
    npm install
    ```
 
@@ -58,14 +73,19 @@ This project is an automated testing suite for validating the Hacker News websit
 
 To run the full test suite:
 
-```
-npm playwright test
+```sh
+npx playwright test
 ```
 
-To run a assignment specific test file:
+To run a specific test file:
 
+```sh
+npx playwright test tests/hacker-news-sorting-validation.spec.ts
 ```
-npx playwright test tests/hacker-news-sorting.spec.ts
+To open last HTML report on your web browser run:
+
+```sh
+npx playwright show-report
 ```
 
 ## Project Structure
@@ -76,7 +96,9 @@ QA-Wolf/
 │    ├── pages/
 │    │   └── HackerNewsPage.ts
 │    ├── tests/
-│    │   └── hacker-news-sorting.spec.ts
+│    │   ├── hacker-news-sorting-validation.spec.ts
+│    │   ├── hacker-news-network-throttling.spec.ts
+│    │   ├── hacker-news-additional-checks.spec.ts
 │    ├── tests-examples/
 │    │   └── demo-todo-app.spec.ts
 │    ├── utils/
@@ -96,15 +118,91 @@ QA-Wolf/
 
 ## Testing
 
-The main test suite is located in `tests/hacker-news-sorting.spec.ts`.
+The main test suite is located in the `tests` directory. It covers:
 
-Additional test cases can be found in `index.ts`. It covers:
+- Article sorting validation (`hacker-news-sorting-validation.spec.ts`)
+- Network throttling (`hacker-news-network-throttling.spec.ts`)
+- Additional checks (`hacker-news-additional-checks.spec.ts`)
 
-- Article sorting validation
-- Performance testing
-- Accessibility testing
-- Security scanning
-- Error handling and reporting
+### Key Points about the Main Test File
+
+- **Organization and Reporting**: It uses Playwright's test runner for better organization and reporting.
+- **Step-by-Step Execution**: The test is broken down into steps for clarity and easier debugging.
+- **Comprehensive Coverage**: It covers multiple aspects: functionality, performance, accessibility, security, and error handling.
+- **Edge Case Handling**: Includes a separate test for error handling, demonstrating attention to edge cases.
+
+### Page Object Model
+
+The Page Object Model is a design pattern that creates an object repository for storing all web elements. It's beneficial because:
+
+- **Reduces Code Duplication**: Improves test maintenance of my codebase.
+- **Enhances Readability**: Makes the test suite more readable and reliable.
+- **Separation of Concerns**: Separates page-specific code from test code.
+
+### Utility Classes
+
+Several utility classes handle specific aspects of testing:
+
+- **ArticleValidator**: Validates the sorting of articles.
+- **PerformanceAnalyzer**: Captures and analyzes performance metrics.
+- **AccessibilityChecker**: Performs accessibility checks on the page.
+- **SecurityScanner**: Conducts basic security scans.
+- **Reporter**: Generates a report of test results.
+
+My aim for using thses classes is to create modular, reusable code.
+
+### Configuration
+
+Using a configuration file allows for easy adjustments to test parameters without modifying my main code.
+
+### Error Handling
+
+Comprehensive error handling includes:
+
+- **Try-Catch Blocks**: In critical sections.
+- **Detailed Error Logging**: Logs detailed error information.
+- **Specific Test Case for Network Errors**: Improves robustness and reliability in test automation.
+
+### Performance Testing
+
+The Metrics i measured include:
+
+- **First Contentful Paint**
+- **Time to Interactive**
+
+These metrics provide insights into the page's loading speed and interactivity.
+
+### Accessibility Testing
+
+Accessibility testing ensures that the website is usable by people with disabilities.
+
+### Security Scanning
+
+Basic security scanning aims at mitigating security concerns in the web applications.
+
+### Responsive Design Testing
+
+Testing the site's behavior on mobile viewports will ensure a good user experience across devices.
+
+### Detailed Logging and Reporting
+
+Detailed logging and reporting are crucial for analyzing test results and tracking issues over time.
+
+### Best Practices Implemented
+
+- **Use of async/await**: For better readability and error handling.
+- **Modular Design**: For better maintainability.
+- **Comprehensive Comments**: Explaining code functionality.
+- **Configuration File**: For easy adjustments.
+- **Separation of Concerns**: Each class has a single responsibility.
+
+### Going Above and Beyond
+
+- **Full Test Framework**: Implemented a comprehensive test framework.
+- **Additional Checks**: Added performance, accessibility, and security checks.
+- **Modular and Extensible Solution**: Created a modular, extensible solution.
+- **Robust Error Handling and Reporting**: Implemented robust error handling and reporting.
+- **Attention to Detail**: Demonstrated attention to detail with comprehensive comments.
 
 ## Performance Analysis
 
@@ -143,7 +241,5 @@ Project configuration is managed in `app.config.ts`. This includes settings for:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
-
-![Screenshot 2024-09-12 024008](https://github.com/user-attachments/assets/d3453148-77e5-4e44-9e85-82ca884a99b3)
-
+This project is licensed under the MIT License - see the LICENSE.md file for details.
+```
