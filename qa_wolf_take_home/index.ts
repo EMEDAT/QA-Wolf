@@ -6,6 +6,7 @@ import { AccessibilityChecker } from './utils/AccessibilityChecker';
 import { SecurityScanner } from './utils/SecurityScanner';
 import { reportResults, PlaywrightTestResult } from './utils/Reporter';
 import config from './app.config';
+const { AxePuppeteer } = require('axe-puppeteer');
 
 /**
  * Validate first 100 articles on Hacker News/newest are sorted from newest to oldest
@@ -127,6 +128,11 @@ test.describe('Hacker News Validation', () => {
   // Check responsive design
   async function checkResponsiveDesign() {
     await test.step('Check responsive design', async () => {
+      // Simulate desktop viewport
+      await page.setViewportSize({ width: 1024, height: 768 });
+      // Simulate mobile viewport
+      await page.setViewportSize({ width: 375, height: 812 });
+
       await hackerNewsPage.setMobileViewport();
       const isMobileMenuVisible = await hackerNewsPage.isMobileMenuVisible();
       expect(isMobileMenuVisible, 'Mobile menu should be visible in mobile viewport').toBeTruthy();
@@ -150,6 +156,9 @@ test.describe('Hacker News Validation', () => {
   // Check accessibility
   async function checkAccessibility() {
     await test.step('Check accessibility', async () => {
+      const results = await new AxePuppeteer(page).analyze();
+      console.log(results.violations); // Log accessibility violations
+
       const accessibilityViolations = await accessibilityChecker.analyze();
       expect(accessibilityViolations.length, 'There should be no accessibility violations').toBe(0);
 
