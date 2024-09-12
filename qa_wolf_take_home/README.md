@@ -49,8 +49,8 @@ This project is an automated testing suite for validating the Hacker News websit
 
 ## Prerequisites
 
-- Node.js (v14 or later)
-- npm (v6 or later)
+- Node.js 18+
+- npm (v10 or later)
 
 ## Installation
 
