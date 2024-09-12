@@ -1,5 +1,6 @@
 import { Page, CDPSession } from 'playwright';
 
+// Define interfaces for performance metrics and analysis results
 export interface PerformanceMetrics {
   firstContentfulPaint: number | null;
   timeToInteractive: number | null;
@@ -16,6 +17,12 @@ interface PerformanceMetric {
   value: number;
 }
 
+interface PerformanceAnalysisResult {
+  metrics: PerformanceMetrics;
+  results: Record<keyof PerformanceMetrics, boolean>;
+  allPassed: boolean;
+}
+
 export class PerformanceAnalyzer {
   private readonly page: Page;
   private readonly thresholds: Config['performanceThresholds'];
@@ -25,6 +32,7 @@ export class PerformanceAnalyzer {
     this.thresholds = config.performanceThresholds;
   }
 
+  // Capture performance metrics using Chrome DevTools Protocol
   async captureMetrics(): Promise<PerformanceMetrics> {
     try {
       const client = await this.page.context().newCDPSession(this.page);
@@ -38,6 +46,7 @@ export class PerformanceAnalyzer {
     }
   }
 
+  // Extract relevant metrics from the raw performance data
   private extractPerformanceMetrics(metrics: PerformanceMetric[]): PerformanceMetrics {
     return {
       firstContentfulPaint: this.getMetricValue(metrics, 'FirstContentfulPaint'),
@@ -47,16 +56,19 @@ export class PerformanceAnalyzer {
     };
   }
 
+  // Helper method to get a specific metric value
   private getMetricValue(metrics: PerformanceMetric[], name: string): number | null {
     const metric = metrics.find(m => m.name === name);
     return metric ? metric.value : null;
   }
 
+  // Analyze performance by capturing metrics and comparing with thresholds
   async analyzePerformance(): Promise<PerformanceAnalysisResult> {
     const metrics = await this.captureMetrics();
     return this.compareWithThresholds(metrics);
   }
 
+  // Compare captured metrics with defined thresholds
   private compareWithThresholds(metrics: PerformanceMetrics): PerformanceAnalysisResult {
     const results: Partial<Record<keyof PerformanceMetrics, boolean>> = {};
     let allPassed = true;
@@ -76,14 +88,9 @@ export class PerformanceAnalyzer {
     };
   }
 
+  // Error handling method
   private handleError(operation: string, error: unknown): never {
     console.error(`Error ${operation}:`, error);
     throw new Error(`Failed to ${operation}`);
   }
-}
-
-interface PerformanceAnalysisResult {
-  metrics: PerformanceMetrics;
-  results: Record<keyof PerformanceMetrics, boolean>;
-  allPassed: boolean;
 }

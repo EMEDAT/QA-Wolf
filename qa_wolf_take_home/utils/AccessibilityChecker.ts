@@ -1,6 +1,7 @@
 import { Page } from '@playwright/test';
 import axe from 'axe-core';
 
+// Define interfaces for configuration and results
 interface Config {
   accessibilityLevel: 'A' | 'AA' | 'AAA';
 }
@@ -37,6 +38,7 @@ export class AccessibilityChecker {
     this.accessibilityLevel = config.accessibilityLevel;
   }
 
+  // Main method to run accessibility analysis
   async analyze(): Promise<AxeViolation[]> {
     try {
       await this.page.evaluate(axe.source);
@@ -48,6 +50,7 @@ export class AccessibilityChecker {
     }
   }
 
+  // Run axe-core analysis
   private async runAxeAnalysis(): Promise<AxeResults> {
     return this.page.evaluate((level: string) => {
       return new Promise((resolve) => {
@@ -59,6 +62,7 @@ export class AccessibilityChecker {
     }, this.accessibilityLevel);
   }
 
+  // Log accessibility violations
   private logViolations(violations: AxeViolation[]): void {
     if (violations.length > 0) {
       console.warn('Accessibility violations found:', JSON.stringify(violations, null, 2));
@@ -67,6 +71,7 @@ export class AccessibilityChecker {
     }
   }
 
+  // Check color contrast
   async checkColorContrast(): Promise<ContrastIssue[]> {
     try {
       const contrastIssues: ContrastIssue[] = await this.page.evaluate(this.evaluateColorContrast);
@@ -77,6 +82,7 @@ export class AccessibilityChecker {
     }
   }
 
+  // Evaluate color contrast on the page
   private evaluateColorContrast(): ContrastIssue[] {
     const elements = document.body.getElementsByTagName('*');
     const issues: ContrastIssue[] = [];
@@ -88,18 +94,14 @@ export class AccessibilityChecker {
       const contrast = this.getContrastRatio(backgroundColor, color);
 
       if (contrast < 4.5) {  // WCAG AA standard for normal text
-        issues.push({
-          element: element.tagName,
-          backgroundColor,
-          color,
-          contrast
-        });
+        issues.push({ element: element.tagName, backgroundColor, color, contrast });
       }
     }
 
     return issues;
   }
 
+  // Log color contrast issues
   private logContrastIssues(contrastIssues: ContrastIssue[]): void {
     if (contrastIssues.length > 0) {
       console.warn('Color contrast issues found:', JSON.stringify(contrastIssues, null, 2));
@@ -108,14 +110,15 @@ export class AccessibilityChecker {
     }
   }
 
+  // Error handling method
   private handleError(operation: string, error: unknown): never {
     console.error(`Error during ${operation}:`, error);
     throw new Error(`Failed to perform ${operation}`);
   }
 
+  // Placeholder method for contrast ratio calculation
   private getContrastRatio(background: string, foreground: string): number {
-    // Implementation of contrast ratio calculation
-    // This should be replaced with a more accurate implementation
+    // TODO: Implement accurate contrast ratio calculation
     return 5; // Placeholder return value
   }
 }

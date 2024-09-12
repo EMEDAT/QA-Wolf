@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 
+// Define interfaces for security issues and configuration
 export interface SecurityIssue {
   type: string;
   message: string;
@@ -7,6 +8,12 @@ export interface SecurityIssue {
 
 interface Config {
   securityHeaders: string[];
+}
+
+interface SecurityAnalysisResult {
+  issues: SecurityIssue[];
+  isSecure: boolean;
+  summary: string;
 }
 
 export class SecurityScanner {
@@ -18,6 +25,7 @@ export class SecurityScanner {
     this.requiredHeaders = config.securityHeaders;
   }
 
+  // Main method to scan for security issues
   async scan(): Promise<SecurityIssue[]> {
     const securityIssues: SecurityIssue[] = [];
 
@@ -27,6 +35,7 @@ export class SecurityScanner {
     return securityIssues;
   }
 
+  // Check if the connection is secure (HTTPS)
   private async checkSecureConnection(issues: SecurityIssue[]): Promise<void> {
     const isSecure = this.page.url().startsWith('https://');
     if (!isSecure) {
@@ -37,6 +46,7 @@ export class SecurityScanner {
     }
   }
 
+  // Check for required security headers
   private async checkSecurityHeaders(issues: SecurityIssue[]): Promise<void> {
     const response = await this.page.goto(this.page.url());
     const headers = response?.headers() || {};
@@ -53,6 +63,7 @@ export class SecurityScanner {
     });
   }
 
+  // Analyze security issues and generate a report
   async analyzeSecurityIssues(): Promise<SecurityAnalysisResult> {
     const issues = await this.scan();
     return {
@@ -62,6 +73,7 @@ export class SecurityScanner {
     };
   }
 
+  // Generate a summary of security issues
   private generateSummary(issues: SecurityIssue[]): string {
     if (issues.length === 0) {
       return 'No security issues found.';
@@ -70,10 +82,4 @@ export class SecurityScanner {
     const summary = issues.map(issue => `- ${issue.type}: ${issue.message}`).join('\n');
     return `Found ${issues.length} security issue(s):\n${summary}`;
   }
-}
-
-interface SecurityAnalysisResult {
-  issues: SecurityIssue[];
-  isSecure: boolean;
-  summary: string;
 }

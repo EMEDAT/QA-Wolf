@@ -1,5 +1,6 @@
 import { ElementHandle } from 'playwright';
 
+// Define interfaces for validation results
 export interface FullValidationResult {
   sorting: SortingResult;
   content: ContentValidationResult[];
@@ -53,6 +54,7 @@ export class ArticleValidator {
     this.timeThreshold = timeThresholdMinutes * 60 * 1000;
   }
 
+  // Validate the sorting of articles
   async validateSorting(articles: ElementHandle[]): Promise<SortingResult> {
     if (!Array.isArray(articles) || articles.length === 0) {
       throw new Error('Invalid input: articles must be a non-empty array');
@@ -79,6 +81,7 @@ export class ArticleValidator {
     return { isValid: true, message: 'All articles are correctly sorted' };
   }
 
+  // Extract timestamp from an article
   private async getArticleTimestamp(article: ElementHandle): Promise<number | null> {
     try {
       const ageElement = await article.$('.age');
@@ -93,6 +96,7 @@ export class ArticleValidator {
     }
   }
 
+  // Validate content of a single article
   async validateArticleContent(article: ElementHandle): Promise<ContentValidationResult> {
     const details = await this.extractArticleDetails(article);
     return {
@@ -101,6 +105,7 @@ export class ArticleValidator {
     };
   }
 
+  // Extract details from an article
   private async extractArticleDetails(article: ElementHandle): Promise<ArticleDetails> {
     const title = await article.$eval('.titlelink', (el: HTMLElement) => el.textContent || '');
     const url = await article.$eval('.titlelink', (el: HTMLAnchorElement) => el.href);
@@ -110,10 +115,12 @@ export class ArticleValidator {
     return { title, url, author, score };
   }
 
+  // Check if article content is valid
   private isValidArticleContent(details: ArticleDetails): boolean {
     return Boolean(details.title && details.url && details.author && !isNaN(details.score));
   }
 
+  // Validate timestamp accuracy of articles
   async validateTimestampAccuracy(articles: ElementHandle[]): Promise<TimestampAccuracyResult> {
     const now = Date.now();
     const inaccurateArticles: InaccurateArticle[] = [];
@@ -131,6 +138,7 @@ export class ArticleValidator {
     };
   }
 
+  // Validate uniqueness of articles
   async validateUniqueness(articles: ElementHandle[]): Promise<UniquenessResult> {
     const titles = new Set<string>();
     const duplicates: DuplicateArticle[] = [];
@@ -150,6 +158,7 @@ export class ArticleValidator {
     };
   }
 
+  // Perform full validation on articles
   async performFullValidation(articles: ElementHandle[]): Promise<FullValidationResult> {
     const [sorting, content, timestampAccuracy, uniqueness] = await Promise.all([
       this.validateSorting(articles),
