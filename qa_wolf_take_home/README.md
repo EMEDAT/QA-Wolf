@@ -1,57 +1,146 @@
-# 🐺 QA Wolf Take Home Assignment
+# Hacker News Validation Project
 
-Welcome to the QA Wolf take home assignment for our [QA Engineer](https://www.notion.so/qawolf/QA-Wolf-QA-Engineer-Remote-156203a1e476459ea5e6ffca972d0efe) role! We appreciate your interest and look forward to seeing what you come up with.
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Testing](#testing)
+- [Performance Analysis](#performance-analysis)
+- [Accessibility Checking](#accessibility-checking)
+- [Security Scanning](#security-scanning)
+- [Reporting](#reporting)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Instructions
+## Overview
 
-This assignment has two questions as outlined below. When you are done, send [qa-hiring@qawolf.com](mailto:qa-hiring@qawolf.com) the following:
+This project is an automated testing suite for validating the Hacker News website (https://news.ycombinator.com/newest). It demonstrates advanced usage of Playwright for end-to-end testing, including performance analysis, accessibility checking, and security scanning.
 
-1. A link to a zip file of this folder on Google Drive 
+## Features
 
-2. A note indicating your work location (Country/State)
+- Validates the sorting of the first 100 articles on Hacker News
+- Performs comprehensive article validation
+- Conducts performance analysis
+- Checks for accessibility issues
+- Scans for security vulnerabilities
+- Verifies responsive design
+- Checks for broken links
+- Validates comment functionality
+- Handles and reports errors gracefully
 
-3. A note of how you found this job post (LinkedIn, Handshake, Wellfound, referral, etc.)
+## Prerequisites
 
-### Question 1
+- Node.js (v14 or later)
+- npm (v6 or later)
 
-In this assignment, you will create a script on [Hacker News](https://news.ycombinator.com/) using JavaScript and Microsoft's [Playwright](https://playwright.dev/) framework. 
+## Installation
 
-1. Install node modules by running `npm i`.
+1. Clone the repository:
+   ```
+   git clone https://github.com/EMEDAT/QA-Wolf.git
+   ```
 
-2. Edit the `index.js` file in this project to go to [Hacker News/newest](https://news.ycombinator.com/newest) and validate that EXACTLY the first 100 articles are sorted from newest to oldest. You can run your script with the `node index.js` command.
+2. Navigate to the project directory:
+   ```
+   cd qa_wolf_take_home
+   ```
 
-Note that you are welcome to update Playwright or install other packages as you see fit, however you must utilize Playwright in this assignment.
+3. Install dependencies:
+   ```
+   npm install
+   ```
 
-### Question 2
+## Usage
 
-Why do you want to work at QA Wolf? Please record a short, ~2 min video that includes:
+To run the full test suite:
 
-1. Your answer 
+```
+npm playwright test
+```
 
-2. A walk-through demonstration of your code, showing a successful execution
+To run a assignment specific test file:
 
-Post the link in `why_qa_wolf.txt` (Please use [Loom](https://www.loom.com) to record your response). The answer and walkthrough should be combined into *one* video.
+```
+npx playwright test tests/hacker-news-sorting.spec.ts
+```
 
-## Frequently Asked Questions
+## Project Structure
 
-### What is your hiring process? When will I hear about next steps?
+```
+QA-Wolf/
+│    qa_wolf_take_home/
+│    ├── pages/
+│    │   └── HackerNewsPage.ts
+│    ├── tests/
+│    │   └── hacker-news-sorting.spec.ts
+│    ├── tests-examples/
+│    │   └── demo-todo-app.spec.ts
+│    ├── utils/
+│    │   ├── AccessibilityChecker.ts
+│    │   ├── ArticleValidator.ts
+│    │   ├── PerformanceAnalyzer.ts
+│    │   ├── Reporter.ts
+│    │   └── SecurityScanner.ts
+│    ├── app.config.ts
+│    ├── index.ts
+│    ├── package.json
+│    ├── playwright.config.ts
+│    ├── tsconfig.json
+│    ├── why_qa_wolf.txt
+│────└── README.md
+```
 
-This take home assignment is the first step in our hiring process, followed by a final round interview if it goes well. **We review every take home assignment submission and promise to get back to you either way within one week (usually sooner).** The only caveat is if we are out of the office, in which case we will get back to you when we return. If it has been more than one week and you have not heard from us, please do follow up.
+## Testing
 
-The final round interview is a 2-hour technical work session that reflects what it is like to work here. We provide a $150 stipend for your time for the final round interview regardless of how it goes. After that, there may be a short chat with our director about your experience and the role.
+The main test suite is located in `tests/hacker-news-sorting.spec.ts`.
 
-Our hiring process is rolling where we review candidates until we have filled our openings. If there are no openings left, we will keep your contact information on file and reach out when we are hiring again.
+Additional test cases can be found in `index.ts`. It covers:
 
-### How do you decide who to hire?
+- Article sorting validation
+- Performance testing
+- Accessibility testing
+- Security scanning
+- Error handling and reporting
 
-We evaluate candidates based on three criteria:
+## Performance Analysis
 
-- Technical ability (as demonstrated in the take home and final round)
-- Customer service orientation (as this role is customer facing)
-- Alignment with our values (captured [here](https://www.notion.so/qawolf/QA-Wolf-QA-Engineer-Remote-156203a1e476459ea5e6ffca972d0efe))
+The `PerformanceAnalyzer` class in `utils/PerformanceAnalyzer.ts` captures and analyzes key performance metrics such as First Contentful Paint, Time to Interactive, and Load Time.
 
-This means whether we hire you is based on how you do during our interview process, not on your previous experience (or lack thereof). Note that you will also need to pass a background check to work here as our customers require this.
+## Accessibility Checking
 
-### How can I help my application stand out?
+The `AccessibilityChecker` class in `utils/AccessibilityChecker.ts` uses axe-core to perform accessibility audits on the page.
 
-We've found that our best hires have been the most enthusiastic throughout our process. If you are very excited about working here, please feel free to go above and beyond on this assignment.
+## Security Scanning
+
+The `SecurityScanner` class in `utils/SecurityScanner.ts` checks for secure connections and required security headers.
+
+## Reporting
+
+Test results are reported using the custom `Reporter` class in `utils/Reporter.ts`. It generates a JSON report with test summaries and details.
+
+## Configuration
+
+Project configuration is managed in `app.config.ts`. This includes settings for:
+
+- Base URL
+- Performance thresholds
+- Viewport sizes
+- Network timeout
+- Accessibility level
+- Required security headers
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
