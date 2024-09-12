@@ -1,49 +1,36 @@
 import { Page, ElementHandle } from '@playwright/test';
 import config from '../app.config';
 
-/**
- * Interface representing the structure of article data.
- */
+// Interface to define the structure of article data
 interface ArticleData {
   title: string;
   timestamp: number;
 }
 
-/**
- * Class representing a Hacker News page.
- * This class provides methods to interact with and scrape data from Hacker News.
- */
+// Class representing the Hacker News page
 export class HackerNewsPage {
   private readonly page: Page;
   private readonly url: string = 'https://news.ycombinator.com/newest';
   private readonly selectors = {
-    article: '.athing',
-    age: '.age',
-    searchInput: 'input[name="q"]',
-    moreLink: 'a.morelink',
-    mobileMenu: '.pagetop > a[href="news"]',
-    comment: '.comment'
+    article: '.athing', // Selector for articles
+    age: '.age', // Selector for article age
+    searchInput: 'input[name="q"]', // Selector for search input
+    moreLink: 'a.morelink', // Selector for "More" link
+    mobileMenu: '.pagetop > a[href="news"]', // Selector for mobile menu
+    comment: '.comment' // Selector for comments
   };
 
-  /**
-   * Creates an instance of HackerNewsPage.
-   * @param {Page} page - The Playwright Page object to interact with.
-   */
+  // Constructor to initialize the page object
   constructor(page: Page) {
     this.page = page;
   }
 
-  /**
-   * Navigates to the Hacker News 'newest' page.
-   */
+  // Method to navigate to the Hacker News page
   async navigate(): Promise<void> {
     await this.page.goto(this.url);
   }
 
-  /**
-   * Retrieves the first hundred articles from Hacker News.
-   * @returns {Promise<ArticleData[]>} An array of ArticleData objects.
-   */
+  // Method to get the first hundred articles
   async getFirstHundredArticles(): Promise<ArticleData[]> {
     const urls = [
       this.url,
@@ -54,7 +41,6 @@ export class HackerNewsPage {
 
     let allArticles: ArticleData[] = [];
 
-    // Iterate through each URL to collect articles
     for (const url of urls) {
       await this.page.goto(url);
       await this.page.waitForSelector(this.selectors.article);
@@ -73,62 +59,43 @@ export class HackerNewsPage {
       allArticles = allArticles.concat(pageArticles);
     }
 
-    // Return only the first 100 articles
     return allArticles.slice(0, 100);
   }
 
-  /**
-   * Performs a search on Hacker News.
-   * @param {string} query - The search query.
-   */
+  // Method to perform a search
   async performSearch(query: string): Promise<void> {
     await this.page.fill(this.selectors.searchInput, query);
     await this.page.press(this.selectors.searchInput, 'Enter');
     await this.page.waitForLoadState('networkidle');
   }
 
-  /**
-   * Retrieves search results from the current page.
-   * @returns {Promise<ElementHandle<Element>[]>} An array of ElementHandles representing search results.
-   */
+  // Method to get search results
   async getSearchResults(): Promise<ElementHandle<Element>[]> {
     return this.page.$$(this.selectors.article);
   }
 
-  /**
-   * Clicks the 'More' link to load additional results.
-   */
+  // Method to click the "More" link
   async clickMoreLink(): Promise<void> {
     await this.page.click(this.selectors.moreLink);
     await this.page.waitForLoadState('networkidle');
   }
 
-  /**
-   * Sets the viewport to mobile dimensions.
-   */
+  // Method to set the mobile viewport
   async setMobileViewport(): Promise<void> {
     await this.page.setViewportSize(config.viewports.mobile);
   }
 
-  /**
-   * Resets the viewport to desktop dimensions.
-   */
+  // Method to reset the viewport to desktop size
   async resetViewport(): Promise<void> {
     await this.page.setViewportSize(config.viewports.desktop);
   }
 
-  /**
-   * Checks if the mobile menu is visible.
-   * @returns {Promise<boolean>} True if the mobile menu is visible, false otherwise.
-   */
+  // Method to check if the mobile menu is visible
   async isMobileMenuVisible(): Promise<boolean> {
     return this.page.isVisible(this.selectors.mobileMenu);
   }
 
-  /**
-   * Checks for broken links on the current page.
-   * @returns {Promise<string[]>} An array of URLs that returned a 4xx or 5xx status code.
-   */
+  // Method to check for broken links
   async checkBrokenLinks(): Promise<string[]> {
     const links = await this.page.$$('a');
     const brokenLinks: string[] = [];
@@ -146,11 +113,7 @@ export class HackerNewsPage {
     return brokenLinks;
   }
 
-  /**
-   * Gets the comment count for a specific article.
-   * @param {number} articleIndex - The index of the article.
-   * @returns {Promise<number>} The number of comments for the article.
-   */
+  // Method to get the comment count for an article
   async getCommentCount(articleIndex: number): Promise<number> {
     const commentElements = await this.page.$$('.subtext');
     if (commentElements.length > articleIndex) {
@@ -161,10 +124,7 @@ export class HackerNewsPage {
     return 0;
   }
 
-  /**
-   * Navigates to the comments section of a specific article.
-   * @param {number} articleIndex - The index of the article.
-   */
+  // Method to navigate to the comments section of an article
   async navigateToComments(articleIndex: number): Promise<void> {
     const commentLinks = await this.page.$$('.subtext a:last-child');
     if (commentLinks.length > articleIndex) {
@@ -172,37 +132,24 @@ export class HackerNewsPage {
     }
   }
 
-  /**
-   * Retrieves visible comments on the current page.
-   * @returns {Promise<ElementHandle<Element>[]>} An array of ElementHandles representing comments.
-   */
+  // Method to get visible comments
   async getVisibleComments(): Promise<ElementHandle<Element>[]> {
     return this.page.$$(this.selectors.comment);
   }
 
-  /**
-   * Retrieves the error log from the browser console.
-   * @returns {Promise<string>} The error log as a string.
-   */
+  // Method to get the error log
   async getErrorLog(): Promise<string> {
     return await this.page.evaluate(() => {
       return (console.error as any).outputs ? (console.error as any).outputs.join('\n') : '';
     });
   }
 
-  /**
-   * Retrieves all articles on the current page.
-   * @returns {Promise<ElementHandle<Element>[]>} An array of ElementHandles representing articles.
-   */
+  // Method to get all articles
   async getArticles(): Promise<ElementHandle<Element>[]> {
     return this.page.$$(this.selectors.article);
   }
 
-  /**
-   * Validates if the articles are sorted in descending order by timestamp.
-   * @param {ArticleData[]} articles - An array of ArticleData objects to validate.
-   * @returns {boolean} True if the articles are correctly sorted, false otherwise.
-   */
+  // Method to validate the sorting of articles
   validateSorting(articles: ArticleData[]): boolean {
     return articles.every((article, index) => 
       index === 0 || article.timestamp <= articles[index - 1].timestamp

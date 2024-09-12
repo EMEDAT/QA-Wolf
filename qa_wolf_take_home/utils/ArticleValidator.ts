@@ -1,4 +1,4 @@
-import { ElementHandle } from 'playwright';
+import { ElementHandle, Page } from 'playwright';
 
 // Define interfaces for validation results
 export interface FullValidationResult {
@@ -47,10 +47,14 @@ interface DuplicateArticle {
   title: string;
 }
 
+// Class representing the Article Validator
 export class ArticleValidator {
+  private readonly page: Page;
   private readonly timeThreshold: number;
 
-  constructor(timeThresholdMinutes: number = 5) {
+  // Constructor to initialize the page object and time threshold
+  constructor(page: Page, timeThresholdMinutes: number = 5) {
+    this.page = page;
     this.timeThreshold = timeThresholdMinutes * 60 * 1000;
   }
 
@@ -88,7 +92,7 @@ export class ArticleValidator {
       if (!ageElement) {
         throw new Error('Age element not found');
       }
-      const ageText = await ageElement.getAttribute('title');
+      const ageText = await this.page.evaluate(el => el?.getAttribute('title'), ageElement);
       return ageText ? new Date(ageText).getTime() : null;
     } catch (error) {
       console.error(`Error getting timestamp for article: ${(error as Error).message}`);
@@ -107,10 +111,10 @@ export class ArticleValidator {
 
   // Extract details from an article
   private async extractArticleDetails(article: ElementHandle): Promise<ArticleDetails> {
-    const title = await article.$eval('.titlelink', (el: HTMLElement) => el.textContent || '');
-    const url = await article.$eval('.titlelink', (el: HTMLAnchorElement) => el.href);
-    const author = await article.$eval('.hnuser', (el: HTMLElement) => el.textContent || '');
-    const score = await article.$eval('.score', (el: HTMLElement) => parseInt(el.textContent || '0', 10));
+    const title = await this.page.evaluate(el => el?.textContent || '', await article.$('.titlelink'));
+    const url = await this.page.evaluate(el => (el as HTMLAnchorElement)?.href || '', await article.$('.titlelink'));
+    const author = await this.page.evaluate(el => el?.textContent || '', await article.$('.hnuser'));
+    const score = await this.page.evaluate(el => parseInt(el?.textContent || '0', 10), await article.$('.score'));
 
     return { title, url, author, score };
   }
@@ -144,7 +148,7 @@ export class ArticleValidator {
     const duplicates: DuplicateArticle[] = [];
 
     for (let i = 0; i < articles.length; i++) {
-      const title = await articles[i].$eval('.titlelink', (el: HTMLElement) => el.textContent || '');
+      const title = await this.page.evaluate(el => el?.textContent || '', await articles[i].$('.titlelink'));
       if (titles.has(title)) {
         duplicates.push({ index: i, title });
       } else {
