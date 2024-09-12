@@ -144,3 +144,6 @@ Project configuration is managed in `app.config.ts`. This includes settings for:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+![Screenshot 2024-09-12 024008](https://github.com/user-attachments/assets/d3453148-77e5-4e44-9e85-82ca884a99b3)
+
