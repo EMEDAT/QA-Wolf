@@ -55,7 +55,7 @@ export class ArticleValidator {
   // Constructor to initialize the page object and time threshold
   constructor(page: Page, timeThresholdMinutes: number = 5) {
     this.page = page;
-    this.timeThreshold = timeThresholdMinutes * 60 * 1000;
+    this.timeThreshold = timeThresholdMinutes * 60 * 1000; // Convert minutes to milliseconds
   }
 
   // Validate the sorting of articles

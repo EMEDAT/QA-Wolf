@@ -17,7 +17,6 @@ import config from './app.config';
  * - Security scanning
  * - Comprehensive error handling and reporting
  */
-
 test.describe('Hacker News Validation', () => {
   let page: Page;
   let hackerNewsPage: HackerNewsPage;
@@ -28,6 +27,7 @@ test.describe('Hacker News Validation', () => {
 
   // Setup before all tests
   test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    // Initialize the page and various utility classes
     page = await browser.newPage();
     hackerNewsPage = new HackerNewsPage(page);
     articleValidator = new ArticleValidator(page);
@@ -46,12 +46,15 @@ test.describe('Hacker News Validation', () => {
 
   // Test: Validate first 100 articles on Hacker News/newest are sorted from newest to oldest
   test('Validate first 100 articles on Hacker News/newest are sorted from newest to oldest', async () => {
+    // Retrieve the first 100 articles from the page
     const articles = await hackerNewsPage.getFirstHundredArticles();
     expect(articles.length).toBe(100);
 
+    // Validate that the articles are sorted correctly
     const isSorted = hackerNewsPage.validateSorting(articles);
     expect(isSorted).toBe(true);
 
+    // Additional check: Verify that each article's timestamp is less than or equal to the previous one
     let prevTimestamp = Infinity;
     for (const article of articles) {
       expect(article.timestamp).toBeLessThanOrEqual(prevTimestamp);
