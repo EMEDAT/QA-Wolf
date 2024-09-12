@@ -9,20 +9,17 @@ import { SecurityScanner } from './utils/SecurityScanner';
 import { reportResults, PlaywrightTestResult } from './utils/Reporter';
 import config from './app.config';
 
-
 /**
- * Validate first 100 articles on Hacker News/newest are sorted from newest to oldest
  * Main test suite for Hacker News validation
- * This suite will demonstrates my advanced usage of Playwright,    including:
+ * This suite demonstrates advanced usage of Playwright, including:
  * - Page Object Model
  * - Performance testing
  * - Accessibility testing
  * - Security scanning
  * - Comprehensive error handling and reporting
  */
-
-
 test.describe('Hacker News Validation', () => {
+  // Declare variables to be used across multiple tests
   let page: Page;
   let hackerNewsPage: HackerNewsPage;
   let articleValidator: ArticleValidator;
@@ -32,6 +29,7 @@ test.describe('Hacker News Validation', () => {
 
   // Setup before all tests
   test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    // Initialize page and utility objects
     page = await browser.newPage();
     hackerNewsPage = new HackerNewsPage(page);
     articleValidator = new ArticleValidator();
@@ -39,6 +37,7 @@ test.describe('Hacker News Validation', () => {
     accessibilityChecker = new AccessibilityChecker(page, config);
     securityScanner = new SecurityScanner(page, config);
   
+    // Set a generous timeout for all tests
     test.setTimeout(30000);
   });
 
@@ -47,7 +46,7 @@ test.describe('Hacker News Validation', () => {
     await page.close();
   });
 
-
+  // Test case: Validate sorting of first 100 articles
   test('Validate first 100 articles on Hacker News/newest are sorted from newest to oldest', async () => {
     const articles = await hackerNewsPage.getFirstHundredArticles();
     expect(articles.length).toBe(100);
@@ -55,13 +54,13 @@ test.describe('Hacker News Validation', () => {
     const isSorted = hackerNewsPage.validateSorting(articles);
     expect(isSorted).toBe(true);
 
+    // Additional check: Ensure each article's timestamp is less than or equal to the previous one
     let prevTimestamp = Infinity;
     for (const article of articles) {
       expect(article.timestamp).toBeLessThanOrEqual(prevTimestamp);
       prevTimestamp = article.timestamp;
     }
   });
-
 
   // Main test case that validates article sorting and performs additional checks
   test('Validate article sorting and perform additional checks', async () => {
@@ -76,17 +75,17 @@ test.describe('Hacker News Validation', () => {
     await validateCommentFunctionality();
   });
 
-  // Additional test case for error handling
+  // Test case: Handle network errors gracefully
   test('Handle network errors gracefully', async () => {
     await simulateNetworkError();
   });
 
-  // Exporting the test results
+  // After all tests, export the results
   test.afterAll(async ({ }, testInfo: TestInfo) => {
     await reportResults(testInfo as any as PlaywrightTestResult);
   });
 
-  // Helper functions
+  // Helper function: Navigate to Hacker News
   async function navigateToHackerNews() {
     await test.step('Navigate to Hacker News newest page', async () => {
       await hackerNewsPage.navigate();
@@ -94,6 +93,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Validate article sorting
   async function validateArticleSorting() {
     await test.step('Validate sorting and perform full validation of first 100 articles', async () => {
       const articleElements = await hackerNewsPage.getArticles();
@@ -109,19 +109,22 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
-
+  // Helper function: Perform additional interactions
   async function performAdditionalInteractions() {
     await test.step('Perform additional interactions', async () => {
+      // Perform a search and verify results
       await hackerNewsPage.performSearch(config.searchQuery);
       const searchResults = await hackerNewsPage.getSearchResults();
       expect(searchResults.length, 'Search should return results').toBeGreaterThan(0);
 
+      // Load more articles and verify
       await hackerNewsPage.clickMoreLink();
       const additionalArticles = await hackerNewsPage.getArticles();
       expect(additionalArticles.length, 'Additional articles should be loaded').toBeGreaterThan(0);
     });
   }
 
+  // Helper function: Check responsive design
   async function checkResponsiveDesign() {
     await test.step('Check responsive design', async () => {
       await hackerNewsPage.setMobileViewport();
@@ -131,6 +134,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Perform performance analysis
   async function performPerformanceAnalysis() {
     await test.step('Perform performance analysis', async () => {
       const performanceMetrics: PerformanceMetrics = await performanceAnalyzer.captureMetrics();
@@ -143,6 +147,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Check accessibility
   async function checkAccessibility() {
     await test.step('Check accessibility', async () => {
       const accessibilityViolations = await accessibilityChecker.analyze();
@@ -154,6 +159,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Perform security scan
   async function performSecurityScan() {
     await test.step('Perform security scan', async () => {
       const securityIssues = await securityScanner.scan();
@@ -165,6 +171,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Check for broken links
   async function checkForBrokenLinks() {
     await test.step('Check for broken links', async () => {
       const brokenLinks = await hackerNewsPage.checkBrokenLinks();
@@ -177,6 +184,7 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Validate comment functionality
   async function validateCommentFunctionality() {
     await test.step('Validate comment functionality', async () => {
       const commentCount = await hackerNewsPage.getCommentCount(1); // Get comment count for the first article
@@ -186,13 +194,17 @@ test.describe('Hacker News Validation', () => {
     });
   }
 
+  // Helper function: Simulate network error
   async function simulateNetworkError() {
+    // Abort all network requests to simulate a network error
     await page.route('**/*', route => route.abort('failed'));
     
+    // Attempt to navigate and expect it to fail
     await expect(async () => {
       await hackerNewsPage.navigate();
     }).rejects.toThrow('net::ERR_FAILED');
 
+    // Check the error log for the expected error message
     const errorLog = await hackerNewsPage.getErrorLog();
     expect(errorLog).toContain('Navigation failed');
   }
