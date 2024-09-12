@@ -1,31 +1,32 @@
+// Import necessary types from Playwright
 import { Page, CDPSession } from 'playwright';
 
 // Define interfaces for performance metrics and analysis results
 export interface PerformanceMetrics {
-  firstContentfulPaint: number | null;
-  timeToInteractive: number | null;
-  domContentLoaded: number | null;
-  loadTime: number | null;
+  firstContentfulPaint: number | null;  // Time to first contentful paint
+  timeToInteractive: number | null;     // Time to interactive
+  domContentLoaded: number | null;      // DOM content loaded time
+  loadTime: number | null;              // Page load time
 }
 
 interface Config {
-  performanceThresholds: Record<keyof PerformanceMetrics, number>;
+  performanceThresholds: Record<keyof PerformanceMetrics, number>;  // Thresholds for each metric
 }
 
 interface PerformanceMetric {
-  name: string;
-  value: number;
+  name: string;   // Name of the metric
+  value: number;  // Value of the metric
 }
 
 interface PerformanceAnalysisResult {
-  metrics: PerformanceMetrics;
-  results: Record<keyof PerformanceMetrics, boolean>;
-  allPassed: boolean;
+  metrics: PerformanceMetrics;  // Captured performance metrics
+  results: Record<keyof PerformanceMetrics, boolean>;  // Whether each metric passed its threshold
+  allPassed: boolean;  // Whether all metrics passed their thresholds
 }
 
 export class PerformanceAnalyzer {
-  private readonly page: Page;
-  private readonly thresholds: Config['performanceThresholds'];
+  private readonly page: Page;  // Playwright Page object
+  private readonly thresholds: Config['performanceThresholds'];  // Performance thresholds
 
   constructor(page: Page, config: Config) {
     this.page = page;
@@ -35,11 +36,15 @@ export class PerformanceAnalyzer {
   // Capture performance metrics using Chrome DevTools Protocol
   async captureMetrics(): Promise<PerformanceMetrics> {
     try {
+      // Create a new CDP session
       const client = await this.page.context().newCDPSession(this.page);
+      // Enable the Performance API
       await client.send('Performance.enable');
+      // Get the performance metrics
       const result = await client.send('Performance.getMetrics');
       const metrics = result.metrics as PerformanceMetric[];
 
+      // Extract and return the relevant performance metrics
       return this.extractPerformanceMetrics(metrics);
     } catch (error) {
       this.handleError('capturing performance metrics', error);
@@ -73,11 +78,12 @@ export class PerformanceAnalyzer {
     const results: Partial<Record<keyof PerformanceMetrics, boolean>> = {};
     let allPassed = true;
 
+    // Iterate through each metric and compare with its threshold
     for (const [key, value] of Object.entries(metrics) as [keyof PerformanceMetrics, number | null][]) {
       if (value !== null) {
         const passed = value <= this.thresholds[key];
         results[key] = passed;
-        allPassed = allPassed && passed;
+        allPassed = allPassed && passed;  // Update allPassed flag
       }
     }
 
