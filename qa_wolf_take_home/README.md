@@ -29,6 +29,7 @@
 - [Reporting](#reporting)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
+- [Demonstrated Skills](#demonstrated-skills)
 - [License](#license)
 
 ## Overview
@@ -253,6 +254,26 @@ Project configuration is managed in `app.config.ts`. This includes settings for:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## Demonstrated Skills
+
+I demonstrated the following skills:
+
+- **Technical Proficiency**:
+  - **JavaScript/Playwright**: Created and maintained tests using Playwright.
+  - **HTML and CSS**: Interacted with and validated HTML elements and their properties.
+  - **Chrome DevTools**: Used for debugging and reproducing failures.
+
+- **Best Practices**:
+  - **Repeating Assertions**: Ensured reliability and robustness of tests.
+  - **AAA Pattern**: Followed the Arrange, Act, Assert (AAA) pattern for structuring tests.
+
+- **Advanced Testing Techniques**:
+  - **Performance Analysis**: Captured and analyzed key performance metrics.
+  - **Accessibility Checking**: Performed comprehensive accessibility audits.
+  - **Security Scanning**: Conducted basic security scans.
+  - **Responsive Design Testing**: Ensured a good user experience across devices.
+  - **Detailed Logging and Reporting**: Logged detailed information about test runs and generated a report.
 
 ## License
 
