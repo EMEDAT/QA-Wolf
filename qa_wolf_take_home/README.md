@@ -258,6 +258,6 @@ Project configuration is managed in `app.config.ts`. This includes settings for:
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
 
-                                              FINAL IMAGE DESCRIPTION: Final image after all is completed!
+                                          FINAL IMAGE DESCRIPTION: Final image after all is completed!
 
 ![Screenshot 2024-09-13 015852](https://github.com/user-attachments/assets/8d2d1d63-595b-4d8c-918d-ee142288e726)
