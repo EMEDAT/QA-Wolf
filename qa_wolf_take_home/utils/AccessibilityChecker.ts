@@ -44,12 +44,15 @@ export class AccessibilityChecker {
   // Main method to run accessibility analysis
   async analyze(): Promise<AxeViolation[]> {
     try {
-      // Inject axe-core into the page
+      // Arrange: Inject axe-core into the page
       await this.page.evaluate(axe.source);
-      // Run the axe analysis
+
+      // Act: Run the axe analysis
       const results: AxeResults = await this.runAxeAnalysis();
-      // Log any violations found
+
+      // Assert: Log any violations found
       this.logViolations(results.violations);
+
       // Return the violations
       return results.violations;
     } catch (error) {
@@ -85,10 +88,12 @@ export class AccessibilityChecker {
   // Check color contrast on the page
   async checkColorContrast(): Promise<ContrastIssue[]> {
     try {
-      // Evaluate color contrast on the page
+      // Arrange: Evaluate color contrast on the page
       const contrastIssues: ContrastIssue[] = await this.page.evaluate(this.evaluateColorContrast);
-      // Log any contrast issues found
+
+      // Assert: Log any contrast issues found
       this.logContrastIssues(contrastIssues);
+
       // Return the contrast issues
       return contrastIssues;
     } catch (error) {

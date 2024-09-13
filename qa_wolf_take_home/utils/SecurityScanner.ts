@@ -32,19 +32,21 @@ export class SecurityScanner {
   async scan(): Promise<SecurityIssue[]> {
     const securityIssues: SecurityIssue[] = [];
 
-    // Perform security checks
+    // Arrange & Act: Perform security checks
     await this.checkSecureConnection(securityIssues);
     await this.checkSecurityHeaders(securityIssues);
 
+    // Assert: Return the security issues
     return securityIssues;
   }
 
   // Check if the connection is secure (HTTPS)
   private async checkSecureConnection(issues: SecurityIssue[]): Promise<void> {
-    // Check if the page URL starts with 'https://'
+    // Arrange: Check if the page URL starts with 'https://'
     const isSecure = this.page.url().startsWith('https://');
+    
+    // Assert: If not secure, add an issue to the list
     if (!isSecure) {
-      // If not secure, add an issue to the list
       issues.push({ 
         type: 'insecure_connection', 
         message: 'The page is not served over HTTPS' 
@@ -54,17 +56,18 @@ export class SecurityScanner {
 
   // Check for required security headers
   private async checkSecurityHeaders(issues: SecurityIssue[]): Promise<void> {
-    // Navigate to the current page and get the response
+    // Arrange & Act: Navigate to the current page and get the response
     const response = await this.page.goto(this.page.url());
-    // Get the headers from the response, or an empty object if no response
+    
+    // Arrange: Get the headers from the response, or an empty object if no response
     const headers = response?.headers() || {};
     
-    // Find missing headers by filtering the required headers
+    // Act: Find missing headers by filtering the required headers
     const missingHeaders = this.requiredHeaders.filter(
       header => !headers[header.toLowerCase()]
     );
 
-    // Add an issue for each missing header
+    // Assert: Add an issue for each missing header
     missingHeaders.forEach(header => {
       issues.push({ 
         type: 'missing_header', 
@@ -75,9 +78,10 @@ export class SecurityScanner {
 
   // Analyze security issues and generate a report
   async analyzeSecurityIssues(): Promise<SecurityAnalysisResult> {
-    // Perform the security scan
+    // Arrange & Act: Perform the security scan
     const issues = await this.scan();
-    // Return the analysis result
+    
+    // Assert: Return the analysis result
     return {
       issues,
       isSecure: issues.length === 0,  // Page is secure if no issues were found
@@ -87,14 +91,15 @@ export class SecurityScanner {
 
   // Generate a summary of security issues
   private generateSummary(issues: SecurityIssue[]): string {
-    // If no issues, return a simple message
+    // Assert: If no issues, return a simple message
     if (issues.length === 0) {
       return 'No security issues found.';
     }
 
-    // Generate a bullet-point list of issues
+    // Act: Generate a bullet-point list of issues
     const summary = issues.map(issue => `- ${issue.type}: ${issue.message}`).join('\n');
-    // Return the summary with a count of issues
+    
+    // Assert: Return the summary with a count of issues
     return `Found ${issues.length} security issue(s):\n${summary}`;
   }
 }

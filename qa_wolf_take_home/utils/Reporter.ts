@@ -45,14 +45,20 @@ export class Reporter {
 
   // Add a test result to the report
   async addTestResult(testName: string, status: 'passed' | 'failed', duration: number, error: Error | null = null): Promise<void> {
+    // Arrange & Act: Create and add the test result
     this.report.details.push(this.createTestResult(testName, status, duration, error));
   }
 
   // Generate and write the report to a file
   async generateReport(outputPath: string): Promise<void> {
     try {
+      // Arrange: Summarize the results
       this.summarizeResults();
+      
+      // Act: Write the report to a file
       await this.writeReportToFile(outputPath);
+      
+      // Assert: Log the report summary
       this.logReportSummary(outputPath);
     } catch (error) {
       this.handleError(error);
@@ -71,9 +77,12 @@ export class Reporter {
 
   // Summarize the test results
   private summarizeResults(): void {
+    // Arrange: Calculate total, passed, and failed tests
     const total = this.report.details.length;
     const passed = this.report.details.filter(test => test.status === 'passed').length;
     const failed = total - passed;
+    
+    // Act & Assert: Create the report summary
     this.report.summary = this.createReportSummary(total, passed, failed);
   }
 
@@ -94,33 +103,44 @@ export class Reporter {
 
   // Write the report to a file
   private async writeReportToFile(outputPath: string): Promise<void> {
+    // Arrange & Act: Convert the report to a JSON string
     const reportContent = JSON.stringify(this.report, null, 2);  // Pretty print JSON with 2 space indentation
+    
+    // Act: Write the JSON string to the specified file
     await fs.writeFile(outputPath, reportContent, 'utf8');
   }
 
   // Log a summary of the report
   private logReportSummary(outputPath: string): void {
+    // Arrange: Destructure the summary object
     const { total, passed, failed, passRate } = this.report.summary as ReportSummary;
+    
+    // Act & Assert: Log the summary details
     console.log(`Test report generated: ${outputPath}`);
     console.log(`Summary: Total: ${total}, Passed: ${passed}, Failed: ${failed}, Pass Rate: ${passRate}`);
   }
 
   // Handle errors during report generation
   private handleError(error: unknown): never {
+    // Log the error to the console
     console.error('Error generating report:', error);
+    // Throw a new error with a descriptive message
     throw new Error('Failed to generate test report');
   }
 }
 
 // Utility function to report test results
 export async function reportResults(result: TestInfo | PlaywrightTestResult): Promise<void> {
+  // Arrange: Determine the status of the test result
   const status = determineStatus(result);
+  
+  // Act & Assert: Log the status
   logStatus(status);
 }
 
 // Determine the status of a test result
 function determineStatus(result: TestInfo | PlaywrightTestResult): 'passed' | 'failed' {
-  // Check if the result object has a 'status' property of type string
+  // Act & Assert: Check if the result object has a 'status' property of type string
   if ('status' in result && typeof result.status === 'string') {
     return result.status === 'passed' ? 'passed' : 'failed';
   }

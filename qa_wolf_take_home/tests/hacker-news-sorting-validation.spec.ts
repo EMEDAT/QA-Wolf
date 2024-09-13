@@ -4,16 +4,14 @@ import { HackerNewsPage } from '../pages/HackerNewsPage';
 
 // Define the test case for sorting validation
 test('Validate first 100 articles on Hacker News/newest are sorted from newest to oldest', async ({ page }) => {
-  // Create an instance of the HackerNewsPage
+  // Arrange: Create an instance of the HackerNewsPage and navigate to the page
   const hackerNewsPage = new HackerNewsPage(page);
-
-  // Navigate to the Hacker News page
   await hackerNewsPage.navigate();
 
-  // Retrieve the first 100 articles from the page
+  // Act: Retrieve the first 100 articles from the page
   const articles = await hackerNewsPage.getFirstHundredArticles();
 
-  // Assert that we have exactly 100 articles
+  // Assert: Verify that we have exactly 100 articles
   expect(articles.length).toBe(100);
 
   // Validate that the articles are sorted correctly
@@ -23,7 +21,7 @@ test('Validate first 100 articles on Hacker News/newest are sorted from newest t
   // Additional check: Verify that each article's timestamp is less than or equal to the previous one
   let prevTimestamp = Infinity;
   for (const article of articles) {
-    expect(article.timestamp).toBeLessThanOrEqual(prevTimestamp);
+    await expect.poll(() => article.timestamp).toBeLessThanOrEqual(prevTimestamp);
     prevTimestamp = article.timestamp;
   }
 });

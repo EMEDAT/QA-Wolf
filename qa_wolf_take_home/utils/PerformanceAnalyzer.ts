@@ -36,15 +36,17 @@ export class PerformanceAnalyzer {
   // Capture performance metrics using Chrome DevTools Protocol
   async captureMetrics(): Promise<PerformanceMetrics> {
     try {
-      // Create a new CDP session
+      // Arrange: Create a new CDP session
       const client = await this.page.context().newCDPSession(this.page);
-      // Enable the Performance API
+      
+      // Act: Enable the Performance API
       await client.send('Performance.enable');
-      // Get the performance metrics
+      
+      // Act: Get the performance metrics
       const result = await client.send('Performance.getMetrics');
       const metrics = result.metrics as PerformanceMetric[];
 
-      // Extract and return the relevant performance metrics
+      // Assert: Extract and return the relevant performance metrics
       return this.extractPerformanceMetrics(metrics);
     } catch (error) {
       this.handleError('capturing performance metrics', error);
@@ -69,7 +71,10 @@ export class PerformanceAnalyzer {
 
   // Analyze performance by capturing metrics and comparing with thresholds
   async analyzePerformance(): Promise<PerformanceAnalysisResult> {
+    // Arrange & Act: Capture performance metrics
     const metrics = await this.captureMetrics();
+    
+    // Assert: Compare captured metrics with defined thresholds
     return this.compareWithThresholds(metrics);
   }
 
@@ -78,7 +83,7 @@ export class PerformanceAnalyzer {
     const results: Partial<Record<keyof PerformanceMetrics, boolean>> = {};
     let allPassed = true;
 
-    // Iterate through each metric and compare with its threshold
+    // Act & Assert: Iterate through each metric and compare with its threshold
     for (const [key, value] of Object.entries(metrics) as [keyof PerformanceMetrics, number | null][]) {
       if (value !== null) {
         const passed = value <= this.thresholds[key];
@@ -87,6 +92,7 @@ export class PerformanceAnalyzer {
       }
     }
 
+    // Assert: Return the performance analysis result
     return {
       metrics,
       results: results as Record<keyof PerformanceMetrics, boolean>,
@@ -96,7 +102,9 @@ export class PerformanceAnalyzer {
 
   // Error handling method
   private handleError(operation: string, error: unknown): never {
+    // Log the error to the console
     console.error(`Error ${operation}:`, error);
+    // Throw a new error with a descriptive message
     throw new Error(`Failed to ${operation}`);
   }
 }

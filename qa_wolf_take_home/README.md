@@ -5,6 +5,7 @@
 - [Features](#features)
   - [Main Assignment](#main-assignment)
   - [Above and Beyond Tests](#above-and-beyond-tests)
+- [Why AAA?](#Why-AAA?)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -45,7 +46,18 @@ This project is an automated testing suite for validating the Hacker News websit
 - **Security Scanning**: Conducts basic security scans.
 - **Error Handling**: Demonstrates attention to edge cases with specific tests for error handling.
 - **Responsive Design Testing**: Ensures a good user experience across devices.
-- **Detailed Logging and Reporting**: Logs detailed information about test runs and generates a report.
+- **Repeating Assertions**: Uses repeating assertions to ensure reliability and robustness of tests.
+- **AAA Pattern**: Follows the Arrange, Act, Assert (AAA) pattern for structuring tests.
+
+## Why AAA?
+
+There are three big reasons why our QA engineering team likes the AAA framework for outlining tests:
+
+1. With standardized outlines, both QA engineers and clients can find gaps in coverage and where additional assertions or tests might be needed.
+2. You can quickly isolate bugs and communicate them to the engineering team that's responsible for them.
+3. If you've thoughtfully documented naming conventions, it's easy for other QA engineers to pick up and understand the test, allowing them to jump into test creation and maintenance much faster.
+
+For more details, you can read the [QA Wolf blog on the AAA pattern](https://www.qawolf.com/blog/intro-to-aaa).
 
 ## Prerequisites
 
@@ -77,12 +89,13 @@ To run the full test suite:
 npx playwright test
 ```
 
-To run a specific test file:
+To run the assignment specific test file:
 
 ```sh
 npx playwright test tests/hacker-news-sorting-validation.spec.ts
 ```
-To open last HTML report on your web browser run:
+
+To open the last HTML report on your web browser, run:
 
 ```sh
 npx playwright show-report
@@ -118,7 +131,7 @@ QA-Wolf/
 
 ## Testing
 
-The main test suite is located in the `tests` directory. It covers:
+The main test suite is located in the [`tests`] directory. It covers:
 
 - Article sorting validation (`hacker-news-sorting-validation.spec.ts`)
 - Network throttling (`hacker-news-network-throttling.spec.ts`)
@@ -149,7 +162,7 @@ Several utility classes handle specific aspects of testing:
 - **SecurityScanner**: Conducts basic security scans.
 - **Reporter**: Generates a report of test results.
 
-My aim for using thses classes is to create modular, reusable code.
+My aim for using these classes is to create modular, reusable code.
 
 ### Configuration
 
@@ -165,7 +178,7 @@ Comprehensive error handling includes:
 
 ### Performance Testing
 
-The Metrics i measured include:
+The Metrics I measured include:
 
 - **First Contentful Paint**
 - **Time to Interactive**
@@ -195,6 +208,8 @@ Detailed logging and reporting are crucial for analyzing test results and tracki
 - **Comprehensive Comments**: Explaining code functionality.
 - **Configuration File**: For easy adjustments.
 - **Separation of Concerns**: Each class has a single responsibility.
+- **Repeating Assertions**: Ensures reliability and robustness of tests.
+- **AAA Pattern**: Follows the Arrange, Act, Assert (AAA) pattern for structuring tests.
 
 ### Going Above and Beyond
 
@@ -242,4 +257,3 @@ Project configuration is managed in `app.config.ts`. This includes settings for:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details.
-```

@@ -4,16 +4,17 @@ import { HackerNewsPage } from '../pages/HackerNewsPage';
 
 // Define the test case for network throttling
 test('Simulate slow network conditions on Hacker News', async ({ page }) => {
-  // Create an instance of the HackerNewsPage
+  // Arrange: Create an instance of the HackerNewsPage and navigate to the page
   const hackerNewsPage = new HackerNewsPage(page);
-
-  // Navigate to the Hacker News page
   await hackerNewsPage.navigate();
 
-  // Simulate slow network conditions
+  // Act: Simulate slow network conditions
   await page.route('**/*', (route) =>
     route.continue({ url: route.request().url(), headers: { 'throttle': '3000' } })
   );
 
-  // Additional checks can be added here if needed
+  // Assert: Additional checks can be added here if needed
+  // Example: Verify that the page still loads within an acceptable time frame
+  const loadTime = await page.evaluate(() => performance.timing.loadEventEnd - performance.timing.navigationStart);
+  await expect.poll(() => loadTime).toBeLessThanOrEqual(10000); // Example threshold of 10 seconds
 });
