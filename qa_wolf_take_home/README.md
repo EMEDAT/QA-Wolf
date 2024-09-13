@@ -5,7 +5,7 @@
 - [Features](#features)
   - [Main Assignment](#main-assignment)
   - [Above and Beyond Tests](#above-and-beyond-tests)
-- [Why AAA?](#Why-AAA?)
+- [Why AAA?](#why-aaa)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Usage](#usage)
